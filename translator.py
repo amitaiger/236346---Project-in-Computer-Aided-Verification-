@@ -104,6 +104,7 @@ def get_id(data):
     column = data.get("range").get("startColumn")
     return str(line)+", "+str(column)    
 
+#get a list of all variables that will be used in the function
 def get_variables(data, variables):
     children = data.get("children")
     if isinstance(children, list):
@@ -114,7 +115,13 @@ def get_variables(data, variables):
                     new_variable = new_variable.split("=", 1)[0]
                     variables.append(new_variable)
                 else:
-                    get_variables(subtree, variables)
+                    if subtree.get("type") == "assignment_expression":
+                        new_variable = get_label(subtree)
+                        new_variable = new_variable.split("=", 1)[0]
+                        if not new_variable in variables:
+                            variables.append(new_variable)
+                    else:
+                        get_variables(subtree, variables)
 
 #produce FOL formula for condition node
 def produce_condition_fol(cfg, route, i):
@@ -214,7 +221,8 @@ def produce_fol_inner(cfg, route, i):
         
     
 
-with open(json_file) as f:
+with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
+benchmarks/c/json/max3.c.ast.json") as f:
     data = json.load(f)
     
 cfg = {}  
