@@ -1,5 +1,4 @@
 import json
-from test.test_importlib import zipdata02
 
 #create node for a return in CFG
 def make_function_node(data, cfg, next, variables):
@@ -215,13 +214,12 @@ def produce_fol_inner(cfg, route, i):
         
     
 
-with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
-benchmarks/c/json/max3.c.ast.json") as f:
+with open(json_file) as f:
     data = json.load(f)
     
 cfg = {}  
 create_cfg (data, cfg, "end", [])
 route = [{"id": "35, 1"}, {"id": "36, 5"}, {"id": "37, 5"}, {"id": "38, 5"}, {"id": "38, 18"}, {"id": "39, 5"}]
 produce_fol (cfg, route)
-#print(json.dumps(cfg, indent = 4))
+print(json.dumps(cfg, indent = 4))
 print(json.dumps(route, indent = 4))
