@@ -1,0 +1,270 @@
+{
+    "8, 1": {
+        "type": "function",
+        "label": " int max3_v1 ( int x , int y , int z ) ",
+        "next": "9, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "9, 5": {
+        "type": "condition",
+        "label": " x < y ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "10, 9",
+        "false": "14, 9"
+    },
+    "10, 9": {
+        "type": "condition",
+        "label": " x < z ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "10, 20",
+        "false": "11, 14"
+    },
+    "10, 20": {
+        "type": "return",
+        "label": " return x ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "11, 14": {
+        "type": "return",
+        "label": " return z ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "14, 9": {
+        "type": "condition",
+        "label": " y < z ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "14, 20",
+        "false": "15, 14"
+    },
+    "14, 20": {
+        "type": "return",
+        "label": " return y ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "15, 14": {
+        "type": "return",
+        "label": " return z ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "22, 1": {
+        "type": "function",
+        "label": " int max3_v2 ( int x , int y , int z ) ",
+        "next": "23, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "23, 5": {
+        "type": "condition",
+        "label": " x < y ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "24, 9",
+        "false": "27, 9"
+    },
+    "24, 9": {
+        "type": "condition",
+        "label": " x < z ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "24, 20",
+        "false": "29, 5"
+    },
+    "24, 20": {
+        "type": "return",
+        "label": " return x ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "27, 9": {
+        "type": "condition",
+        "label": " y < z ",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ],
+        "true": "27, 20",
+        "false": "29, 5"
+    },
+    "27, 20": {
+        "type": "return",
+        "label": " return y ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "29, 5": {
+        "type": "return",
+        "label": " return z ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z "
+        ]
+    },
+    "35, 1": {
+        "type": "function",
+        "label": " int max3_v3 ( int x , int y , int z ) ",
+        "next": "36, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ]
+    },
+    "36, 5": {
+        "type": "assignment",
+        "label": " int ",
+        "next": "37, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ]
+    },
+    "37, 5": {
+        "type": "condition",
+        "label": " y < tmp ",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ],
+        "true": "37, 18",
+        "false": "38, 5"
+    },
+    "37, 18": {
+        "type": "assignment",
+        "label": " tmp = y ",
+        "next": "38, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ]
+    },
+    "38, 5": {
+        "type": "condition",
+        "label": " z < tmp ",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ],
+        "true": "38, 18",
+        "false": "39, 5"
+    },
+    "38, 18": {
+        "type": "assignment",
+        "label": " tmp = z ",
+        "next": "39, 5",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ]
+    },
+    "39, 5": {
+        "type": "return",
+        "label": " return tmp ; ",
+        "next": "end",
+        "variables": [
+            " x ",
+            " y ",
+            " z ",
+            " tmp "
+        ]
+    }
+}
+
+[
+    {
+        "id": "35, 1",
+        "T": "( x , y , z , z )",
+        "R": "true & z < tmp & ! y < tmp "
+    },
+    {
+        "id": "36, 5",
+        "R": "true & z < tmp & ! y < tmp ",
+        "T": "( x , y , z , z )"
+    },
+    {
+        "id": "37, 5",
+        "T": "( x , y , z , z )",
+        "R": "true & z < tmp & ! y < tmp "
+    },
+    {
+        "id": "38, 5",
+        "T": "( x , y , z , z )",
+        "R": "true & z < tmp "
+    },
+    {
+        "id": "38, 18",
+        "R": "true ",
+        "T": "( x , y , z , z )"
+    },
+    {
+        "id": "39, 5",
+        "R": "true ",
+        "T": "( x , y , z , tmp )"
+    }
+]
