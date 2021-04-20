@@ -231,7 +231,7 @@
             " ( arr [ i + 2 ] ) "
         ],
         "true": "42, 32",
-        "false": "42, 96"
+        "false": "43, 5"
     },
     "42, 32": {
         "type": "assignment",
@@ -262,7 +262,7 @@
     "42, 74": {
         "type": "assignment",
         "label": " ( arr [ i + 1 ] ) = tmp ",
-        "next": "42, 96",
+        "next": "43, 5",
         "variables": [
             " arr [ 100 ] ",
             " i ",
@@ -284,7 +284,7 @@
             " ( arr [ i + 2 ] ) "
         ],
         "true": "43, 36",
-        "false": "43, 108"
+        "false": "44, 5"
     },
     "43, 36": {
         "type": "assignment",
@@ -315,7 +315,7 @@
     "43, 86": {
         "type": "assignment",
         "label": " ( arr [ i + 2 ] ) = tmp ",
-        "next": "43, 108",
+        "next": "44, 5",
         "variables": [
             " arr [ 100 ] ",
             " i ",
@@ -337,7 +337,7 @@
             " ( arr [ i + 2 ] ) "
         ],
         "true": "44, 32",
-        "false": "44, 96"
+        "false": "46, 6"
     },
     "44, 32": {
         "type": "assignment",
@@ -368,7 +368,7 @@
     "44, 74": {
         "type": "assignment",
         "label": " ( arr [ i + 1 ] ) = tmp ",
-        "next": "44, 96",
+        "next": "46, 6",
         "variables": [
             " arr [ 100 ] ",
             " i ",

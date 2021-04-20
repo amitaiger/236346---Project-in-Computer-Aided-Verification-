@@ -189,16 +189,23 @@ def get_initial_t(variables):
      
 #traverse through json AST and create nodes for CFG
 def create_cfg (data, cfg, next, variables):
+    valid_types = ["function_definition",
+        "declaration",
+        "expression_statement",
+        "jump_statement",
+        "selection_statement"]
     variables = handle_type(data, cfg, next, variables)
     children = data.get("children")
     if isinstance(children, list):
         for i, subtree in enumerate(children, 0):
             if isinstance(subtree, dict):
-                if data.get("type") == "block_item_list":
-                    if i+1 == len(children):
-                        create_cfg (subtree, cfg, next, variables)
-                    else:
-                        create_cfg (subtree, cfg, get_id(children[i+1]), variables) 
+                if data.get("type") == "block_item_list" and not i+1 == len(children):
+                    new_next = next
+                    for j in range(len(children))[(i+1):]:
+                        if children[j].get("type") in valid_types:
+                            new_next = get_id(children[j])
+                            break 
+                    create_cfg (subtree, cfg, new_next, variables) 
                 else:
                     create_cfg (subtree, cfg, next, variables)                        
 
@@ -226,13 +233,14 @@ def produce_fol_inner(cfg, route, i):
         
     
 
-with open("max3.c.ast.json") as f:
+with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
+benchmarks/c/json/max3.c.ast.json") as f:
     data = json.load(f)
     
 cfg = {}  
 create_cfg (data, cfg, "end", [])
 route = [{"id": "35, 1"}, {"id": "36, 5"}, {"id": "37, 5"}, {"id": "38, 5"}, {"id": "38, 18"}, {"id": "39, 5"}]
-#route = [{"id": "28, 1"}, {"id": "29, 5"}, {"id": "33, 9"}, {"id": "35, 5"}] this is a route for array.c
+#route = [{"id": "28, 1"}, {"id": "29, 5"}, {"id": "33, 9"}, {"id": "35, 5"}] #this is a route for array.c
 produce_fol (cfg, route)
 print(json.dumps(cfg, indent = 4))
 print(json.dumps(route, indent = 4))
