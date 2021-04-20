@@ -1,6 +1,6 @@
 import json
 
-#create node for a return in CFG
+#create node for a function declaration in CFG
 def make_function_node(data, cfg, next, variables):
     id = get_id(data)
     label = get_label(data)
@@ -99,6 +99,7 @@ def get_label_inner(data, label):
             if isinstance(subtree, dict):
                 get_label_inner(subtree, label)
 
+#for a node, get its id. A node's id is its row number and column number
 def get_id(data):
     line = data.get("range").get("startLineNumber")
     column = data.get("range").get("startColumn")
@@ -121,7 +122,15 @@ def get_variables(data, variables):
                         if not new_variable in variables:
                             variables.append(new_variable)
                     else:
-                        get_variables(subtree, variables)
+                        if subtree.get("type") == "jump_statement":
+                            new_variable = get_label(subtree)
+                            new_variable = new_variable[len(" return"):]
+                            new_variable = new_variable[:-2]
+                            if not new_variable in variables:
+                                variables.append(new_variable)
+                        else:
+                            get_variables(subtree, variables)  
+                        
 
 #produce FOL formula for condition node
 def produce_condition_fol(cfg, route, i):
@@ -156,7 +165,7 @@ def produce_assignment_fol(cfg, route, i):
         route[i]["T"] = route[i+1].get("T")
         route[i]["T"] = route[i]["T"].replace(variable, value)
 
-#produce FOL formula for assignment node
+#produce FOL formula for return node
 def produce_return_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
@@ -199,10 +208,6 @@ def produce_fol (cfg, route):
     id = route[0].get("id")
     node = cfg.get(id)
     produce_fol_inner(cfg, route, 0)
-    if node.get("type") == "function":
-        produce_fol_inner(cfg, route, 0)
-        node["T"] = route[1].get("T")
-        node["R"] = route[2].get("R")
             
 def produce_fol_inner(cfg, route, i):
     id = route[i].get("id")
@@ -221,12 +226,14 @@ def produce_fol_inner(cfg, route, i):
         
     
 
-with open("max3.c.ast.json") as f:
+with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
+benchmarks/c/json/max3.c.ast.json") as f:
     data = json.load(f)
     
 cfg = {}  
 create_cfg (data, cfg, "end", [])
 route = [{"id": "35, 1"}, {"id": "36, 5"}, {"id": "37, 5"}, {"id": "38, 5"}, {"id": "38, 18"}, {"id": "39, 5"}]
+#route = [{"id": "28, 1"}, {"id": "29, 5"}, {"id": "33, 9"}, {"id": "35, 5"}] this is a route for array.c
 produce_fol (cfg, route)
 print(json.dumps(cfg, indent = 4))
 print(json.dumps(route, indent = 4))
