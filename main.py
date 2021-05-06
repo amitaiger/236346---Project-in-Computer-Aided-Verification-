@@ -2,8 +2,7 @@ import json
 import cfg
 import fol    
 
-with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
-benchmarks/c/json/array.c.ast.json") as f:
+with open("max3.ast.json") as f:
     data = json.load(f)
     
 program_cfg = {}  
