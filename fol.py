@@ -13,11 +13,19 @@ def produce_condition_fol(cfg, route, i):
         else: #next node is false
             route[i]["R"] = route[i+1].get("R") + "& !" + label
 
-#produce FOL formula for assignment node
-def produce_assignment_fol(cfg, route, i):
+#produce FOL formula for a declaration, assignment or assert node
+def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
+    if node.get("type") == "declaration" or node.get("type") == "assert": #TODO: change assert here to fit
+        if len(route) == i+1:
+            route[i]["R"] = "true "
+            route[i]["T"] = get_initial_t(node.get("variables"))
+        else:
+            route[i]["T"] = route[i+1].get("T")
+            route[i]["R"] = route[i+1].get("R")
+        return
     variable = label.split("=", 1)[0]
     value = label[label.find("="):]
     value = value[1:]
@@ -66,7 +74,9 @@ def produce_fol_inner(cfg, route, i):
         produce_fol_inner(cfg, route, i+1)
     switch = {
         "condition": produce_condition_fol,
-        "assignment": produce_assignment_fol,
+        "declaration": produce_static_fol,
+        "assignment": produce_static_fol,
+        "assert": produce_static_fol,
         "return": produce_return_fol,
         "function": produce_function_fol
     }

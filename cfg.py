@@ -15,18 +15,23 @@ def make_function_node(data, cfg, next, variables):
     get_variables(data, cfg[id].get("variables"))
     return cfg[id].get("variables")
 
-#create node for an assignment in CFG    
-def make_assignment_node(data, cfg, next, variables):
+#create node for a declaration, assignment or assert in CFG    
+def make_static_node(data, cfg, next, variables):
     id = get_id(data)
     if data.get("type") == "declaration":
-        if isinstance(data.get("children")[1], dict):
-            label = get_label(data.get("children")[1])
+        label = get_label(data.get("children")[1])
+        if data.get("children")[1].get("type") == "init_declarator":
+            node_type = "assignment"
         else:
-            return variables #declaration without initiation, no node needed
+            node_type = "declaration"
     else: #type is expression statement
-        label = get_label(data.get("children")[0])       
+        label = get_label(data.get("children")[0])
+        if label.startswith(" assert"):
+            node_type = "assert"
+        else:
+            node_type = "assignment"       
     cfg[id] = {
-        "type": "assignment",
+        "type": node_type,
         "label": label,
         "next": next,
         "variables": variables
@@ -75,8 +80,8 @@ def handle_type(data, cfg, next, variables):
     node_type = data.get("type")
     switch = {
         "function_definition": make_function_node,
-        "declaration": make_assignment_node,
-        "expression_statement": make_assignment_node,
+        "declaration": make_static_node,
+        "expression_statement": make_static_node,
         "jump_statement": make_return_node,
         "selection_statement": make_selection_node
     }
