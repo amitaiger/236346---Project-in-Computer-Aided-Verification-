@@ -26,8 +26,8 @@ def produce_static_fol(cfg, route, i):
             route[i]["T"] = route[i+1].get("T")
             route[i]["R"] = route[i+1].get("R")
         if node.get("type") == "assert":
-            label = label[11:]
-            label = label[:-4] #strips assert to its condition
+            label = label[9:]
+            label = label[:-2] #strips assert to its condition
             route[i]["q2"] = label;
         return
     variable = label.split("=", 1)[0] #gets variable that is being assigned to
