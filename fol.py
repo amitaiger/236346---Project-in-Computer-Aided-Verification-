@@ -18,17 +18,21 @@ def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    if node.get("type") == "declaration" or node.get("type") == "assert": #TODO: change assert here to fit
+    if node.get("type") == "declaration" or node.get("type") == "assert":
         if len(route) == i+1:
             route[i]["R"] = "true "
             route[i]["T"] = get_initial_t(node.get("variables"))
         else:
             route[i]["T"] = route[i+1].get("T")
             route[i]["R"] = route[i+1].get("R")
+        if node.get("type") == "assert":
+            label = label[11:]
+            label = label[:-4] #strips assert to its condition
+            route[i]["q2"] = label;
         return
-    variable = label.split("=", 1)[0]
+    variable = label.split("=", 1)[0] #gets variable that is being assigned to
     value = label[label.find("="):]
-    value = value[1:]
+    value = value[1:] #gets value being assigned
     if len(route) == i+1:
         route[i]["R"] = "true "
         route[i]["T"] = get_initial_t(node.get("variables"))
