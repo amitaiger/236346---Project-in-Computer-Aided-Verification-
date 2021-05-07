@@ -13,7 +13,7 @@ def produce_condition_fol(cfg, route, i):
         else: #next node is false
             route[i]["R"] = route[i+1].get("R") + "& !" + label
 
-#produce FOL formula for a declaration, assignment or assert node
+#produce FOL formula for a declaration,  assignment or assert node
 def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
@@ -55,6 +55,19 @@ def produce_return_fol(cfg, route, i):
 def produce_function_fol(cfg, route, i):
     route[i]["T"] = route[i+1].get("T")
     route[i]["R"] = route[i+1].get("R")
+
+#produce ensures node, goes at the end of every path in given function    
+def produce_ensures_fol(cfg, id):
+    node = cfg.get(id)
+    label = node.get("label")
+    label = label[label.find("("):]
+    label = label[1:]
+    label = label[:-2] #string ensures to its condition
+    new_node = {
+        "id": id,
+        "q2": label
+    }
+    return new_node
     
 #get the t for an end label    
 def get_initial_t(variables):
@@ -84,10 +97,25 @@ def produce_fol_inner(cfg, route, i):
         "return": produce_return_fol,
         "function": produce_function_fol
     }
-    func = switch.get(node.get("type"))
+    func = switch.get(node.get("type"), lambda cfg, route, i : None)
     func(cfg, route, i)
+
+#adds ensures to end of every route in case it was defined
+def append_ensures (cfg, routes):
+    for name, node in cfg.items():
+        if node.get("type") == "ensures":
+            new_node = produce_ensures_fol(cfg, name)
+            for route in routes:
+                for subnode in route:
+                    if subnode.get("id") != node.get("function") and route.index(subnode) == 0: #route not of current ensures function
+                        break
+                    if route.index(subnode) == len(route)-1:
+                        route.append(new_node)
+                        break
+                        
 
 #produce FOL formula for a list containing all routes in CFG
 def produce_fol_routes (cfg, routes):
     for route in routes:
         produce_fol (cfg, route)
+    append_ensures (cfg, routes)

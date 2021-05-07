@@ -6,8 +6,12 @@ def make_function_node(data, cfg, next, variables):
     label = get_label(data)
     next = data.get("children")[2].get("children")[1].get("children")[0]
     next_id = get_id(next)
+    if label.startswith(" inline void ensures"): #is only used as implimintation of ensure
+        type = "ignore"
+    else:
+        type = "function"
     cfg[id] = {
-        "type": "function",
+        "type": type,
         "label": label,
         "next": next_id,
         "variables": []
@@ -29,7 +33,10 @@ def make_static_node(data, cfg, next, variables):
         if label.startswith(" assert"):
             node_type = "assert"
         else:
-            node_type = "assignment"       
+            if label.startswith(" ensures"):
+                node_type = "ensures"
+            else:
+                node_type = "assignment"       
     cfg[id] = {
         "type": node_type,
         "label": label,
@@ -137,7 +144,14 @@ def get_variables(data, variables):
                             get_variables(subtree, variables)  
 
 #traverse through json AST and create nodes for CFG
-def create_cfg (data, cfg, next, variables):
+def create_cfg (data, cfg, next_node, variables):
+    create_cfg_inner (data, cfg, next_node, variables)
+    cfg_iter = iter(cfg.items())
+    for name, node in cfg_iter:
+        if node.get("type") == "ensures":
+            node["function"] = next(cfg_iter)[0]
+
+def create_cfg_inner (data, cfg, next, variables):
     valid_types = ["function_definition",
         "declaration",
         "expression_statement",
@@ -154,11 +168,10 @@ def create_cfg (data, cfg, next, variables):
                         if children[j].get("type") in valid_types:
                             new_next = get_id(children[j])
                             break 
-                    create_cfg (subtree, cfg, new_next, variables) 
+                    create_cfg_inner (subtree, cfg, new_next, variables) 
                 else:
-                    create_cfg (subtree, cfg, next, variables)
-
-
+                    create_cfg_inner (subtree, cfg, next, variables)
+            
 #find all routes in CFG
 def find_routes (cfg, routes):
     for name, node in cfg.items():
