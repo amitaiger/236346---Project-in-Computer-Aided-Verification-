@@ -91,9 +91,11 @@ def produce_fol_inner(cfg, route, i):
         produce_fol_inner(cfg, route, i+1)
     switch = {
         "condition": produce_condition_fol,
+        "loop": produce_condition_fol,
         "declaration": produce_static_fol,
         "assignment": produce_static_fol,
         "assert": produce_static_fol,
+        "do": produce_static_fol,
         "return": produce_return_fol,
         "function": produce_function_fol
     }

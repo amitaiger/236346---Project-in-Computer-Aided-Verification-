@@ -36,7 +36,10 @@ def make_static_node(data, cfg, next, variables):
             if label.startswith(" ensures"):
                 node_type = "ensures"
             else:
-                node_type = "assignment"       
+                if data.get("children")[0].get("type") == "relational_expression":
+                    return variables #for loop condition node, already created
+                else:
+                    node_type = "assignment"    
     cfg[id] = {
         "type": node_type,
         "label": label,
@@ -66,7 +69,7 @@ def make_selection_node(data, cfg, next, variables):
             cfg[id]["false"] = get_id(else_block.get("children")[1].get("children")[0])
         else:
             cfg[id]["false"] = get_id(else_block)
-    else:
+    else: #no else statement
         cfg[id]["false"] = next
     return variables
     
@@ -82,15 +85,79 @@ def make_return_node(data, cfg, next, variables):
     }
     return variables
 
+#create node for a loop in CFG
+def make_loop_node(data, cfg, next, variables):
+    id = get_id(data)
+    loop_type = data.get("children")[0].get("type")
+    if loop_type == "WHILE":
+        condition = data.get("children")[2]
+        loop_block = data.get("children")[4]
+    else: #for or do while loop
+        do_id = id
+        cfg[do_id] = {
+            "type": "do",
+            "label": "do",
+            "variables": variables
+            }
+        if loop_type == "FOR":
+            condition = data.get("children")[3].get("children")[0]
+            loop_block = data.get("children")[6]
+            advancement = data.get("children")[4]
+            initializer = data.get("children")[2]
+            id = get_id(data.get("children")[3])
+            advancement_id = get_id(advancement)
+            advancement_label = get_label(advancement)
+            cfg[advancement_id] = {
+                "type": "assignment",
+                "label": advancement_label,
+                "next": id,
+                "variables": variables
+                }
+            initializer_id = get_id(initializer)
+            initializer_label = get_label(initializer)
+            cfg[initializer_id] = {
+                "type": "assignment",
+                "label": initializer_label,
+                "next": id,
+                "variables": variables
+                }
+            
+        else:
+            if loop_type == "DO": #do while loop
+                condition = data.get("children")[4]
+                loop_block = data.get("children")[1]
+                id = get_id(data.get("children")[2])
+    cfg[id] = {
+        "type": "loop",
+        "variables": variables,
+        "false": next,
+        "label": get_label(condition)
+    }
+    if loop_block.get("type") == "compound_statement":
+        loop_start = get_id(loop_block.get("children")[1].get("children")[0])
+    else:
+        loop_start = id #empty loop
+    if loop_type == "DO":
+        cfg[do_id]["next"] = loop_start
+    else:
+        if loop_type == "FOR":
+            cfg[do_id]["next"] = initializer_id
+    cfg[id]["true"] = loop_start
+    return variables
+
 #create a new node in CFG depending on type in json AST
 def handle_type(data, cfg, next, variables):
     node_type = data.get("type")
+    node_id = get_id(data)
+    if node_id in cfg:
+        return variables
     switch = {
         "function_definition": make_function_node,
         "declaration": make_static_node,
         "expression_statement": make_static_node,
         "jump_statement": make_return_node,
-        "selection_statement": make_selection_node
+        "selection_statement": make_selection_node,
+        "iteration_statement": make_loop_node
     }
     func = switch.get(node_type, lambda data, cfg, next, variables : variables)
     return func(data, cfg, next, variables)
@@ -119,29 +186,22 @@ def get_id(data):
 
 #get a list of all variables that will be used in the function
 def get_variables(data, variables):
+    get_variables_inner(data, variables)
+    if len(variables) > 0:
+        del variables[0] #remove function name from list of variables
+    while " assert " in variables:
+        variables.remove(" assert ")
+        
+def get_variables_inner(data, variables):
     children = data.get("children")
     if isinstance(children, list):
         for subtree in children:
             if isinstance(subtree, dict):
-                if subtree.get("type") == "parameter_declaration" or subtree.get("type") == "declaration":
-                    new_variable = get_label(subtree.get("children")[1])
-                    new_variable = new_variable.split("=", 1)[0]
-                    variables.append(new_variable)
-                else:
-                    if subtree.get("type") == "assignment_expression":
-                        new_variable = get_label(subtree)
-                        new_variable = new_variable.split("=", 1)[0]
-                        if not new_variable in variables:
-                            variables.append(new_variable)
-                    else:
-                        if subtree.get("type") == "jump_statement":
-                            new_variable = get_label(subtree)
-                            new_variable = new_variable[len(" return"):]
-                            new_variable = new_variable[:-2]
-                            if not new_variable in variables:
-                                variables.append(new_variable)
-                        else:
-                            get_variables(subtree, variables)  
+                if subtree.get("type") == "IDENTIFIER":
+                    new_variable = " "+subtree.get("text")+" "
+                    if not new_variable in variables:
+                        variables.append(new_variable)
+                get_variables_inner(subtree, variables)
 
 #traverse through json AST and create nodes for CFG
 def create_cfg (data, cfg, next_node, variables):
@@ -156,21 +216,35 @@ def create_cfg_inner (data, cfg, next, variables):
         "declaration",
         "expression_statement",
         "jump_statement",
-        "selection_statement"]
+        "selection_statement",
+        "iteration_statement"]
     variables = handle_type(data, cfg, next, variables)
     children = data.get("children")
+    if data.get("type") == "iteration_statement":
+        loop_type = data.get("children")[0].get("type")
+        if loop_type == "DO":
+            new_next = get_id(data.get("children")[2])
+        else:
+            if loop_type == "FOR":
+                new_next = get_id(data.get("children")[4])
+            else: #while loop
+                new_next = get_id(data)
+    else:
+        new_next = next
     if isinstance(children, list):
         for i, subtree in enumerate(children, 0):
             if isinstance(subtree, dict):
                 if data.get("type") == "block_item_list" and not i+1 == len(children):
-                    new_next = next
                     for j in range(len(children))[(i+1):]:
                         if children[j].get("type") in valid_types:
                             new_next = get_id(children[j])
                             break 
                     create_cfg_inner (subtree, cfg, new_next, variables) 
                 else:
-                    create_cfg_inner (subtree, cfg, next, variables)
+                    if data.get("type") == "iteration_statement":
+                        create_cfg_inner (subtree, cfg, new_next, variables)
+                    else:
+                        create_cfg_inner (subtree, cfg, next, variables)
             
 #find all routes in CFG
 def find_routes (cfg, routes):
