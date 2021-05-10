@@ -4,7 +4,7 @@ def produce_condition_fol(cfg, route, i):
     node = cfg.get(id)
     label = node.get("label")
     if len(route) == i+1:
-        route[i]["R"] = label
+        route[i]["R"] = " true "
         route[i]["T"] = get_initial_t(node.get("variables"))
     else:
         route[i]["T"] = route[i+1].get("T")
@@ -13,28 +13,37 @@ def produce_condition_fol(cfg, route, i):
         else: #next node is false
             route[i]["R"] = route[i+1].get("R") + "& !" + label
 
-#produce FOL formula for a declaration,  assignment or assert node
+#produce FOL formula for a declaration or assert node
 def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    if node.get("type") == "declaration" or node.get("type") == "assert":
-        if len(route) == i+1:
-            route[i]["R"] = "true "
-            route[i]["T"] = get_initial_t(node.get("variables"))
-        else:
-            route[i]["T"] = route[i+1].get("T")
-            route[i]["R"] = route[i+1].get("R")
-        if node.get("type") == "assert":
-            label = label[9:]
-            label = label[:-2] #strips assert to its condition
-            route[i]["q2"] = label;
-        return
-    variable = label.split("=", 1)[0] #gets variable that is being assigned to
-    value = label[label.find("="):]
-    value = value[1:] #gets value being assigned
     if len(route) == i+1:
-        route[i]["R"] = "true "
+        route[i]["R"] = " true "
+        route[i]["T"] = get_initial_t(node.get("variables"))
+    else:
+        route[i]["T"] = route[i+1].get("T")
+        route[i]["R"] = route[i+1].get("R")
+    if node.get("type") == "assert":
+        label = label[9:]
+        label = label[:-2] #strips assert to its condition
+        route[i]["q2"] = label;
+
+#produce FOL formula for an assignment node
+def produce_assignment_fol(cfg, route, i):
+    id = route[i].get("id")
+    node = cfg.get(id)
+    label = node.get("label")
+    if label.endswith("++ "):
+        variable = label.split("++", 1)[0]
+        value = " ("+variable+"+ 1 "+") "
+    else: #varaible = value assignment
+        variable = label.split("=", 1)[0] #gets variable that is being assigned to
+        value = label[label.find("="):]
+        value = value[1:] #gets value being assigned
+        value = " ("+value+") "
+    if len(route) == i+1:
+        route[i]["R"] = " true "
         route[i]["T"] = get_initial_t(node.get("variables"))
         route[i]["T"] = route[i]["T"].replace(variable, value)
     else:
@@ -48,7 +57,7 @@ def produce_return_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    route[i]["R"] = "true "
+    route[i]["R"] = " true "
     route[i]["T"] = get_initial_t(node.get("variables"))
 
 #produce FOL formula for function decleration node
@@ -87,13 +96,13 @@ def produce_fol (cfg, route):
 def produce_fol_inner(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
-    if node.get("next") != "end":
+    if i < len(route) - 1:
         produce_fol_inner(cfg, route, i+1)
     switch = {
         "condition": produce_condition_fol,
         "loop": produce_condition_fol,
+        "assignment": produce_assignment_fol,
         "declaration": produce_static_fol,
-        "assignment": produce_static_fol,
         "assert": produce_static_fol,
         "do": produce_static_fol,
         "return": produce_return_fol,

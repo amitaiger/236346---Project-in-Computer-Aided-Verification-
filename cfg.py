@@ -114,7 +114,7 @@ def make_loop_node(data, cfg, next, variables):
                 "variables": variables
                 }
             initializer_id = get_id(initializer)
-            initializer_label = get_label(initializer)
+            initializer_label = get_label(initializer.get("children")[0])
             cfg[initializer_id] = {
                 "type": "assignment",
                 "label": initializer_label,
@@ -249,7 +249,7 @@ def create_cfg_inner (data, cfg, next, variables):
 #find all routes in CFG
 def find_routes (cfg, routes):
     for name, node in cfg.items():
-        if node.get("type") == "function":
+        if node.get("type") == "function" or node.get("type") == "loop":
             routes.append([])
             find_routes_inner(cfg, routes, routes[-1], name)
     
@@ -257,9 +257,11 @@ def find_routes (cfg, routes):
 def find_routes_inner (cfg, routes, current_route, current_node_name):
     current_route.append({"id": current_node_name})
     current_node = cfg.get(current_node_name)
-    if current_node.get("next") == "end":
+    if current_node.get("next") == "end" or \
+    (current_node.get("type") == "loop" and len(current_route) > 1):
         return
-    if current_node.get("type") == "condition":
+    if current_node.get("type") == "condition" or \
+    current_node.get("type") == "loop":
         routes.append(copy.deepcopy(current_route))
         false_route = routes[-1]
         find_routes_inner(cfg, routes, current_route, current_node.get("true"))
