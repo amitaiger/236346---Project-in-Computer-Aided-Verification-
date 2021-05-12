@@ -37,20 +37,43 @@ def produce_assignment_fol(cfg, route, i):
     if label.endswith("++ "):
         variable = label.split("++", 1)[0]
         value = " ("+variable+"+ 1 "+") "
-    else: #varaible = value assignment
+    else: #"varaible = value" assignment
         variable = label.split("=", 1)[0] #gets variable that is being assigned to
         value = label[label.find("="):]
         value = value[1:] #gets value being assigned
         value = " ("+value+") "
+    variable = remove_parentheses(variable)
     if len(route) == i+1:
         route[i]["R"] = " true "
         route[i]["T"] = get_initial_t(node.get("variables"))
-        route[i]["T"] = route[i]["T"].replace(variable, value)
     else:
         route[i]["R"] = route[i+1].get("R")
-        route[i]["R"] = route[i]["R"].replace(variable, value)
         route[i]["T"] = route[i+1].get("T")
-        route[i]["T"] = route[i]["T"].replace(variable, value)
+    if "[" in variable:
+        left_index = variable.index("[")
+        right_index = variable.rindex("]")
+        array_name = variable[:left_index]
+        array_index = variable[left_index+1:right_index]
+        t_list = list(route[i]["T"][1:-1].split(","))
+        for t_variable in t_list:
+            if t_variable.startswith(array_name):
+                left_index = t_variable.index("[")
+                right_index = t_variable.rindex("]")
+                array_entries =  t_variable[left_index+1:right_index]
+                if array_index+"<-" in array_entries:
+                    array_list = list(array_entries.split(","))
+                    for array_entry in array_list:
+                        if array_entry.startswith(array_index+"<-"):
+                            array_entries_new = array_entries.replace(array_entry, array_index+"<-"+value)  
+                else:
+                    if array_entries == " ":
+                        t_variable_new = array_name+"[ " +array_index+"<-"+value+"] "
+                    else:
+                        array_entries_new = array_entries+"| "+array_index+"<-"+value    
+                        t_variable_new = t_variable.replace(array_entries, array_entries_new)
+                    route[i]["T"] = route[i]["T"].replace(t_variable, t_variable_new)                 
+    route[i]["R"] = route[i]["R"].replace(variable, value)  
+    route[i]["T"] = route[i]["T"].replace(variable, value)
 
 #produce FOL formula for return node
 def produce_return_fol(cfg, route, i):
@@ -82,10 +105,18 @@ def produce_ensures_fol(cfg, id):
 def get_initial_t(variables):
     initial_t = "("
     for variable in variables:
-        initial_t = initial_t + variable +","
+        initial_t = initial_t + variable.get("name") +","
     initial_t = initial_t[:-1]
     initial_t = initial_t+")"
     return initial_t
+
+#removes any parantheses at start or end of string
+def remove_parentheses(s):
+    while s.startswith(" ("):
+        s = s[2:]
+    while s.endswith(") "):
+        s = s[:-2]
+    return s
 
 #produce FOL formula for a route in CFG. route is represtended by a list of dicts,
 #with each dict having an id entry representing its node

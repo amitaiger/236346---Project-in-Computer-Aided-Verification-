@@ -186,22 +186,26 @@ def get_id(data):
 
 #get a list of all variables that will be used in the function
 def get_variables(data, variables):
-    get_variables_inner(data, variables)
-    if len(variables) > 0:
-        del variables[0] #remove function name from list of variables
-    while " assert " in variables:
-        variables.remove(" assert ")
-        
-def get_variables_inner(data, variables):
     children = data.get("children")
     if isinstance(children, list):
         for subtree in children:
             if isinstance(subtree, dict):
-                if subtree.get("type") == "IDENTIFIER":
-                    new_variable = " "+subtree.get("text")+" "
-                    if not new_variable in variables:
-                        variables.append(new_variable)
-                get_variables_inner(subtree, variables)
+                if subtree.get("type") == "declaration" or \
+                 subtree.get("type") == "parameter_declaration":
+                    variable_type = get_label(subtree.get("children")[0])
+                    if subtree.get("children")[1].get("type") == "init_declarator":
+                        names_node = subtree.get("children")[1].get("children")[0]
+                    else:
+                        names_node = subtree.get("children")[1]  
+                    variable_names = get_label(names_node)
+                    variable_list = list(variable_names.split(","))
+                    for variable_name in variable_list:
+                        if "[" in variable_name:
+                            left_index = variable_name.index("[")
+                            variable_name = variable_name[:left_index]+"[ ] "
+                        variables.append({"type": variable_type,
+                                           "name": variable_name})
+                get_variables(subtree, variables)
 
 #traverse through json AST and create nodes for CFG
 def create_cfg (data, cfg, next_node, variables):
