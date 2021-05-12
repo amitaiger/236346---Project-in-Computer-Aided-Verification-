@@ -193,7 +193,11 @@ def get_variables(data, variables):
                 if subtree.get("type") == "declaration" or \
                  subtree.get("type") == "parameter_declaration":
                     variable_type = get_label(subtree.get("children")[0])
-                    variable_names = get_label(subtree.get("children")[1])
+                    if subtree.get("children")[1].get("type") == "init_declarator":
+                        names_node = subtree.get("children")[1].get("children")[0]
+                    else:
+                        names_node = subtree.get("children")[1]  
+                    variable_names = get_label(names_node)
                     variable_list = list(variable_names.split(","))
                     for variable_name in variable_list:
                         if "[" in variable_name:
