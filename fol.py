@@ -4,14 +4,14 @@ def produce_condition_fol(cfg, route, i):
     node = cfg.get(id)
     label = node.get("label")
     if len(route) == i+1:
-        route[i]["R"] = " true "
+        route[i]["R"] = " True "
         route[i]["T"] = get_initial_t(node.get("variables"))
     else:
         route[i]["T"] = route[i+1].get("T")
-        if route[i+1].get("id") == node.get("true"):
-            route[i]["R"] = route[i+1].get("R") + "&" + label
+        if route[i+1].get("id") == node.get("True"):
+            route[i]["R"] = " And ("+route[i+1].get("R") + "," + label+")"
         else: #next node is false
-            route[i]["R"] = route[i+1].get("R") + "& !" + label
+            route[i]["R"] = " And ("+route[i+1].get("R") + "," + " Not (" + label +") )"
 
 #produce FOL formula for a declaration or assert node
 def produce_static_fol(cfg, route, i):
@@ -19,15 +19,11 @@ def produce_static_fol(cfg, route, i):
     node = cfg.get(id)
     label = node.get("label")
     if len(route) == i+1:
-        route[i]["R"] = " true "
+        route[i]["R"] = " True "
         route[i]["T"] = get_initial_t(node.get("variables"))
     else:
         route[i]["T"] = route[i+1].get("T")
         route[i]["R"] = route[i+1].get("R")
-    if node.get("type") == "assert":
-        label = label[9:]
-        label = label[:-2] #strips assert to its condition
-        route[i]["q2"] = label;
 
 #produce FOL formula for an assignment node
 def produce_assignment_fol(cfg, route, i):
@@ -44,7 +40,7 @@ def produce_assignment_fol(cfg, route, i):
         value = " ("+value+") "
     variable = remove_parentheses(variable)
     if len(route) == i+1:
-        route[i]["R"] = " true "
+        route[i]["R"] = " True "
         route[i]["T"] = get_initial_t(node.get("variables"))
     else:
         route[i]["R"] = route[i+1].get("R")
@@ -80,7 +76,7 @@ def produce_return_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    route[i]["R"] = " true "
+    route[i]["R"] = " True "
     route[i]["T"] = get_initial_t(node.get("variables"))
 
 #produce FOL formula for function decleration node
@@ -91,13 +87,10 @@ def produce_function_fol(cfg, route, i):
 #produce ensures node, goes at the end of every path in given function    
 def produce_ensures_fol(cfg, id):
     node = cfg.get(id)
-    label = node.get("label")
-    label = label[label.find("("):]
-    label = label[1:]
-    label = label[:-2] #string ensures to its condition
+    l = node.get("l")
     new_node = {
         "id": id,
-        "q2": label
+        "l": l
     }
     return new_node
     
@@ -151,13 +144,39 @@ def append_ensures (cfg, routes):
                 for subnode in route:
                     if subnode.get("id") != node.get("function") and route.index(subnode) == 0: #route not of current ensures function
                         break
-                    if route.index(subnode) == len(route)-1:
+                    if cfg[subnode.get("id")].get("next") == "end":
                         route.append(new_node)
                         break
                         
+
+#adds assertions to start and end of route if it doesn't have one
+def add_assertions (cfg, routes):
+    for route in routes:
+        first_node = route[0]
+        last_node = route[len(route)-1]
+        first_node["l"] = find_assertion(cfg, first_node)
+        last_node["l"] = find_assertion(cfg, last_node)
+
+#find the assertion for node in next node, if it exists.
+#otherwise, assertions is just 'True'
+def find_assertion (cfg, node):
+    if "l" in node:
+        return node.get("l")
+    if cfg[node.get("id")].get("type") == "loop":
+        next = cfg[node.get("id")].get("true")
+    else:
+        next = cfg[node.get("id")].get("next")
+    if next == "end":
+        return " True "
+    next_node = cfg[next]
+    if "l" in next_node:
+        return next_node.get("l")
+    return " True "
+        
 
 #produce FOL formula for a list containing all routes in CFG
 def produce_fol_routes (cfg, routes):
     for route in routes:
         produce_fol (cfg, route)
     append_ensures (cfg, routes)
+    add_assertions (cfg, routes)

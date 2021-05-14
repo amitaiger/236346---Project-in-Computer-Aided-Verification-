@@ -22,6 +22,7 @@ def make_function_node(data, cfg, next, variables):
 #create node for a declaration, assignment or assert in CFG    
 def make_static_node(data, cfg, next, variables):
     id = get_id(data)
+    l = None;
     if data.get("type") == "declaration":
         label = get_label(data.get("children")[1])
         if data.get("children")[1].get("type") == "init_declarator":
@@ -32,9 +33,14 @@ def make_static_node(data, cfg, next, variables):
         label = get_label(data.get("children")[0])
         if label.startswith(" assert"):
             node_type = "assert"
+            l = label[9:]
+            l = l[:-2] #strips assert to its condition
         else:
             if label.startswith(" ensures"):
                 node_type = "ensures"
+                l = label[label.find("("):]
+                l = l[1:]
+                l = l[:-2] #strips ensures to its condition
             else:
                 if data.get("children")[0].get("type") == "relational_expression":
                     return variables #for loop condition node, already created
@@ -46,6 +52,8 @@ def make_static_node(data, cfg, next, variables):
         "next": next,
         "variables": variables
     }
+    if not l == None:
+        cfg[id]["l"] = l
     return variables
 
 #create node for a conditional (if) in CFG    
@@ -164,7 +172,7 @@ def handle_type(data, cfg, next, variables):
 
 #for a node, get the label as a string
 def get_label(data):
-    label = {"string": " "}
+    label = {"string": ""}
     get_label_inner(data, label)
     return label.get("string")
         
@@ -172,11 +180,23 @@ def get_label_inner(data, label):
     if data.get("type") == "compound_statement":
         return
     if data.get("children") is None:
-        label[("string")] = label.get("string")+data.get("text")+" "
+        label[("string")] = label.get("string")+" "+data.get("text")+" "
+    else:
+        if data.get("type") == "unary_expression" and data.get("children")[0].get("text") == "!":
+            label["string"] = " Not ("+get_label(data.get("children")[1])+") "
+            return
+        else:
+            if data.get("type") == "logical_and_expression":
+                label[("string")] = " And ("+get_label(data.get("children")[0])+","+get_label(data.get("children")[2])+") "
+                return
+            else:
+                if data.get("type") == "logical_or_expression":
+                    label[("string")] = " Or ("+get_label(data.get("children")[0])+","+get_label(data.get("children")[2])+") "
+                    return
     if isinstance(data.get("children"), list):
         for subtree in data.get("children"):
             if isinstance(subtree, dict):
-                get_label_inner(subtree, label)
+                label["string"] = label.get("string")+get_label(subtree)
 
 #for a node, get its id. A node's id is its row number and column number
 def get_id(data):
