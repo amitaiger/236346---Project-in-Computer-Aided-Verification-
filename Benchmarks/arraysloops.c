@@ -19,29 +19,31 @@ int max_array (int a[], int n){
 //sorts array in range 0 <= i < n
 int bubble_sort (int a[], int n){
 	assert(n >= 0);
-	int i, j, tmp, var1, var2, var3, var4, var5;
+	int i, j, tmp, var1, var2, var3, var4, var5, var6;
 	for (i = 0; i < n-1; i++){
-		assert (!(n-i <= var1 < n && !(!(0 <= var2 < n-i && !(a[var1] >= a[var2])))));
+		assert (!(n-i <= var1 < n && !(!(0 <= var2 < n-i && !(a[var1] >= a[var2])))) &&
+				!((n-i <= var3 < n && n-i <= var4 < n && var3 <= var4) && !(a[var3] <= a[var4])));
 		for (j = 0; j < n-i-1; j++){
 			assert (!(0 <= var3 < j && !(a[j] >= a[var3])));
 			if (a[j] > a[j+1]) SWAP (a[j], a[j+1])
 		}
 	}
-	assert (!(((0 <= var4 < n) && (0 <= var5 < n) && (var4 <= var5)) && !(a[var4] <= a[var5])));
+	assert (!(((0 <= var5 < n) && (0 <= var6 < n) && (var5 <= var6)) && !(a[var5] <= a[var6])));
 }
 
 //sorts array in range 0 <= i < n, but with an intentionally wrong loop invariant
 int bubble_sort_wrong (int a[], int n){
 	assert(n >= 0);
-	int i, j, tmp, var1, var2, var3, var4, var5;
+	int i, j, tmp, var1, var2, var3, var4, var5, var6;
 	for (i = 0; i < n-1; i++){
-		assert (!(n-i <= var1 < n && !(!(0 <= var2 < n-i && !(a[var1] >= a[var2])))));
+		assert (!(n-i <= var1 < n && !(!(0 <= var2 < n-i && !(a[var1] >= a[var2])))) &&
+				!((n-i <= var3 < n && n-i <= var4 < n && var3 <= var4) && !(a[var3] <= a[var4])));
 		for (j = 0; j < n-i-1; j++){
 			assert (!(0 <= var3 < i && !(a[j] >= a[var3])));
 			if (a[j] > a[j+1]) SWAP (a[j], a[j+1])
 		}
 	}
-	assert (!(((0 <= var4 < n) && (0 <= var5 < n) && (var4 <= var5)) && !(a[var4] <= a[var5])));
+	assert (!(((0 <= var5 < n) && (0 <= var6 < n) && (var5 <= var6)) && !(a[var5] <= a[var6])));
 }
 
 //takes a sorted array and finds i so that a[i] == x. If no such i exists, returns -1
