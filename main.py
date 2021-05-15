@@ -1,8 +1,9 @@
 import json
 import cfg
-import fol    
+import fol 
+import verification   
 
-with open("max3.ast.json") as f:
+with open("arraysloops.c.ast.json") as f:
     data = json.load(f)
     
 program_cfg = {}  
@@ -12,3 +13,4 @@ cfg.find_routes (program_cfg, routes)
 fol.produce_fol_routes (program_cfg, routes)
 print(json.dumps(program_cfg, indent = 4))
 print(json.dumps(routes, indent = 4))
+verification.verify_program (routes, program_cfg)
