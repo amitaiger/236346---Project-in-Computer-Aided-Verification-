@@ -3,8 +3,7 @@ import cfg
 import fol 
 import verification   
 
-with open("D:/Projects/20-21 Spring/project in verification/Teaching.Verification.Project-master/\
-benchmarks/c/json/arraysloops.c.ast.json") as f:
+with open("arraysloops.c.ast.json") as f:
     data = json.load(f)
     
 program_cfg = {}  
