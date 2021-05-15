@@ -8,7 +8,7 @@ def produce_condition_fol(cfg, route, i):
         route[i]["T"] = get_initial_t(node.get("variables"))
     else:
         route[i]["T"] = route[i+1].get("T")
-        if route[i+1].get("id") == node.get("True"):
+        if route[i+1].get("id") == node.get("true"):
             route[i]["R"] = " And ("+route[i+1].get("R") + "," + label+")"
         else: #next node is false
             route[i]["R"] = " And ("+route[i+1].get("R") + "," + " Not (" + label +") )"
@@ -50,24 +50,8 @@ def produce_assignment_fol(cfg, route, i):
         right_index = variable.rindex("]")
         array_name = variable[:left_index]
         array_index = variable[left_index+1:right_index]
-        t_list = list(route[i]["T"][1:-1].split(","))
-        for t_variable in t_list:
-            if t_variable.startswith(array_name):
-                left_index = t_variable.index("[")
-                right_index = t_variable.rindex("]")
-                array_entries =  t_variable[left_index+1:right_index]
-                if array_index+"<-" in array_entries:
-                    array_list = list(array_entries.split(","))
-                    for array_entry in array_list:
-                        if array_entry.startswith(array_index+"<-"):
-                            array_entries_new = array_entries.replace(array_entry, array_index+"<-"+value)  
-                else:
-                    if array_entries == " ":
-                        t_variable_new = array_name+"[ " +array_index+"<-"+value+"] "
-                    else:
-                        array_entries_new = array_entries+"| "+array_index+"<-"+value    
-                        t_variable_new = t_variable.replace(array_entries, array_entries_new)
-                    route[i]["T"] = route[i]["T"].replace(t_variable, t_variable_new)                 
+        new_variable = " Store ( "+array_name+" , "+array_index+","+value+") "
+        route[i]["T"] = route[i]["T"].replace(array_name, new_variable)             
     route[i]["R"] = route[i]["R"].replace(variable, value)  
     route[i]["T"] = route[i]["T"].replace(variable, value)
 
@@ -87,10 +71,10 @@ def produce_function_fol(cfg, route, i):
 #produce ensures node, goes at the end of every path in given function    
 def produce_ensures_fol(cfg, id):
     node = cfg.get(id)
-    l = node.get("l")
+    i = node.get("I")
     new_node = {
         "id": id,
-        "l": l
+        "I": i
     }
     return new_node
     
@@ -98,7 +82,10 @@ def produce_ensures_fol(cfg, id):
 def get_initial_t(variables):
     initial_t = "("
     for variable in variables:
-        initial_t = initial_t + variable.get("name") +","
+        name = variable.get("name")
+        if name.endswith("[ ] "):
+            name = name[:-4]
+        initial_t = initial_t + name +"|"
     initial_t = initial_t[:-1]
     initial_t = initial_t+")"
     return initial_t
@@ -154,14 +141,14 @@ def add_assertions (cfg, routes):
     for route in routes:
         first_node = route[0]
         last_node = route[len(route)-1]
-        first_node["l"] = find_assertion(cfg, first_node)
-        last_node["l"] = find_assertion(cfg, last_node)
+        first_node["I"] = find_assertion(cfg, first_node)
+        last_node["I"] = find_assertion(cfg, last_node)
 
 #find the assertion for node in next node, if it exists.
 #otherwise, assertions is just 'True'
 def find_assertion (cfg, node):
-    if "l" in node:
-        return node.get("l")
+    if "I" in cfg[node.get("id")]:
+        return cfg[node.get("id")].get("I")
     if cfg[node.get("id")].get("type") == "loop":
         next = cfg[node.get("id")].get("true")
     else:
@@ -169,8 +156,8 @@ def find_assertion (cfg, node):
     if next == "end":
         return " True "
     next_node = cfg[next]
-    if "l" in next_node:
-        return next_node.get("l")
+    if "I" in next_node:
+        return next_node.get("I")
     return " True "
         
 
