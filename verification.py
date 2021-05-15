@@ -5,7 +5,7 @@ def verify_route (route, cfg):
     first = route[0]
     last = route[len(route)-1]
     variables = cfg[first.get("id")].get("variables")
-    for variable in variables:
+    for variable in variables: #declare functions variables
         type = variable.get("type")
         name = variable.get("name")
         name = trim_whitespace(name)
@@ -32,10 +32,10 @@ def verify_route (route, cfg):
     last_i = trim_whitespace(last.get("I"))
     first_t_list = list(trim_whitespace(first.get("T"))[1:-1].split("|"))
     last_t_list = list(trim_whitespace(last.get("T"))[1:-1].split("|"))
-    for i in range(len(first_t_list)):
+    for i in range(len(first_t_list)): #declare variables used with last assert
         exec("s.add("+trim_whitespace(last_t_list[i])+"_last == "+trim_whitespace(first_t_list[i])+")")
         last_i = last_i.replace(last_t_list[i], " "+trim_whitespace(last_t_list[i])+"_last"+" ")
-    exec("s.add(Not(Implies(And("+first_i+", "+r+"), "+last_i+")))")
+    exec("s.add(Not(Implies(And("+first_i+", "+r+"), "+last_i+")))") #negation of floyd's rule
     if s.check() == sat:
         print("Error in route ("+first.get("id")+") -> ("+last.get("id")+")")
         #print (s.model())
