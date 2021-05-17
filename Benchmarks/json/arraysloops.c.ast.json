@@ -5541,7 +5541,7 @@
                     "startLineNumber": 40,
                     "startColumn": 4,
                     "endLineNumber": 41,
-                    "endColumn": 27
+                    "endColumn": 26
                    },
                    "children": [
                     {
@@ -5594,7 +5594,7 @@
                       "startLineNumber": 41,
                       "startColumn": 4,
                       "endLineNumber": 41,
-                      "endColumn": 27
+                      "endColumn": 26
                      },
                      "children": [
                       {
@@ -5603,7 +5603,7 @@
                         "startLineNumber": 41,
                         "startColumn": 4,
                         "endLineNumber": 41,
-                        "endColumn": 26
+                        "endColumn": 25
                        },
                        "children": [
                         {
@@ -5629,12 +5629,12 @@
                          }
                         },
                         {
-                         "type": "equality_expression",
+                         "type": "relational_expression",
                          "range": {
                           "startLineNumber": 41,
                           "startColumn": 11,
                           "endLineNumber": 41,
-                          "endColumn": 25
+                          "endColumn": 24
                          },
                          "children": [
                           {
@@ -5693,28 +5693,39 @@
                            ]
                           },
                           {
-                           "type": "EQ_OP",
-                           "text": "==",
+                           "type": ">",
+                           "text": ">",
                            "children": null,
                            "range": {
                             "startLineNumber": 41,
                             "startColumn": 16,
                             "endLineNumber": 41,
-                            "endColumn": 18
+                            "endColumn": 17
                            }
                           },
                           {
                            "type": "postfix_expression",
                            "range": {
                             "startLineNumber": 41,
-                            "startColumn": 19,
+                            "startColumn": 18,
                             "endLineNumber": 41,
-                            "endColumn": 25
+                            "endColumn": 24
                            },
                            "children": [
                             {
                              "type": "IDENTIFIER",
                              "text": "a",
+                             "children": null,
+                             "range": {
+                              "startLineNumber": 41,
+                              "startColumn": 18,
+                              "endLineNumber": 41,
+                              "endColumn": 19
+                             }
+                            },
+                            {
+                             "type": "[",
+                             "text": "[",
                              "children": null,
                              "range": {
                               "startLineNumber": 41,
@@ -5724,28 +5735,28 @@
                              }
                             },
                             {
-                             "type": "[",
-                             "text": "[",
-                             "children": null,
+                             "type": "additive_expression",
                              "range": {
                               "startLineNumber": 41,
                               "startColumn": 20,
                               "endLineNumber": 41,
-                              "endColumn": 21
-                             }
-                            },
-                            {
-                             "type": "additive_expression",
-                             "range": {
-                              "startLineNumber": 41,
-                              "startColumn": 21,
-                              "endLineNumber": 41,
-                              "endColumn": 24
+                              "endColumn": 23
                              },
                              "children": [
                               {
                                "type": "IDENTIFIER",
                                "text": "i",
+                               "children": null,
+                               "range": {
+                                "startLineNumber": 41,
+                                "startColumn": 20,
+                                "endLineNumber": 41,
+                                "endColumn": 21
+                               }
+                              },
+                              {
+                               "type": "+",
+                               "text": "+",
                                "children": null,
                                "range": {
                                 "startLineNumber": 41,
@@ -5755,25 +5766,14 @@
                                }
                               },
                               {
-                               "type": "+",
-                               "text": "+",
+                               "type": "CONSTANT",
+                               "text": "1",
                                "children": null,
                                "range": {
                                 "startLineNumber": 41,
                                 "startColumn": 22,
                                 "endLineNumber": 41,
                                 "endColumn": 23
-                               }
-                              },
-                              {
-                               "type": "CONSTANT",
-                               "text": "1",
-                               "children": null,
-                               "range": {
-                                "startLineNumber": 41,
-                                "startColumn": 23,
-                                "endLineNumber": 41,
-                                "endColumn": 24
                                }
                               }
                              ]
@@ -5784,9 +5784,9 @@
                              "children": null,
                              "range": {
                               "startLineNumber": 41,
-                              "startColumn": 24,
+                              "startColumn": 23,
                               "endLineNumber": 41,
-                              "endColumn": 25
+                              "endColumn": 24
                              }
                             }
                            ]
@@ -5799,9 +5799,9 @@
                          "children": null,
                          "range": {
                           "startLineNumber": 41,
-                          "startColumn": 25,
+                          "startColumn": 24,
                           "endLineNumber": 41,
-                          "endColumn": 26
+                          "endColumn": 25
                          }
                         }
                        ]
@@ -5812,9 +5812,9 @@
                        "children": null,
                        "range": {
                         "startLineNumber": 41,
-                        "startColumn": 26,
+                        "startColumn": 25,
                         "endLineNumber": 41,
-                        "endColumn": 27
+                        "endColumn": 26
                        }
                       }
                      ]
@@ -7054,7 +7054,7 @@
               "startLineNumber": 53,
               "startColumn": 3,
               "endLineNumber": 54,
-              "endColumn": 26
+              "endColumn": 25
              },
              "children": [
               {
@@ -7107,7 +7107,7 @@
                 "startLineNumber": 54,
                 "startColumn": 3,
                 "endLineNumber": 54,
-                "endColumn": 26
+                "endColumn": 25
                },
                "children": [
                 {
@@ -7116,7 +7116,7 @@
                   "startLineNumber": 54,
                   "startColumn": 3,
                   "endLineNumber": 54,
-                  "endColumn": 25
+                  "endColumn": 24
                  },
                  "children": [
                   {
@@ -7142,12 +7142,12 @@
                    }
                   },
                   {
-                   "type": "equality_expression",
+                   "type": "relational_expression",
                    "range": {
                     "startLineNumber": 54,
                     "startColumn": 10,
                     "endLineNumber": 54,
-                    "endColumn": 24
+                    "endColumn": 23
                    },
                    "children": [
                     {
@@ -7206,28 +7206,39 @@
                      ]
                     },
                     {
-                     "type": "EQ_OP",
-                     "text": "==",
+                     "type": ">",
+                     "text": ">",
                      "children": null,
                      "range": {
                       "startLineNumber": 54,
                       "startColumn": 15,
                       "endLineNumber": 54,
-                      "endColumn": 17
+                      "endColumn": 16
                      }
                     },
                     {
                      "type": "postfix_expression",
                      "range": {
                       "startLineNumber": 54,
-                      "startColumn": 18,
+                      "startColumn": 17,
                       "endLineNumber": 54,
-                      "endColumn": 24
+                      "endColumn": 23
                      },
                      "children": [
                       {
                        "type": "IDENTIFIER",
                        "text": "a",
+                       "children": null,
+                       "range": {
+                        "startLineNumber": 54,
+                        "startColumn": 17,
+                        "endLineNumber": 54,
+                        "endColumn": 18
+                       }
+                      },
+                      {
+                       "type": "[",
+                       "text": "[",
                        "children": null,
                        "range": {
                         "startLineNumber": 54,
@@ -7237,28 +7248,28 @@
                        }
                       },
                       {
-                       "type": "[",
-                       "text": "[",
-                       "children": null,
+                       "type": "additive_expression",
                        "range": {
                         "startLineNumber": 54,
                         "startColumn": 19,
                         "endLineNumber": 54,
-                        "endColumn": 20
-                       }
-                      },
-                      {
-                       "type": "additive_expression",
-                       "range": {
-                        "startLineNumber": 54,
-                        "startColumn": 20,
-                        "endLineNumber": 54,
-                        "endColumn": 23
+                        "endColumn": 22
                        },
                        "children": [
                         {
                          "type": "IDENTIFIER",
                          "text": "i",
+                         "children": null,
+                         "range": {
+                          "startLineNumber": 54,
+                          "startColumn": 19,
+                          "endLineNumber": 54,
+                          "endColumn": 20
+                         }
+                        },
+                        {
+                         "type": "+",
+                         "text": "+",
                          "children": null,
                          "range": {
                           "startLineNumber": 54,
@@ -7268,25 +7279,14 @@
                          }
                         },
                         {
-                         "type": "+",
-                         "text": "+",
+                         "type": "CONSTANT",
+                         "text": "1",
                          "children": null,
                          "range": {
                           "startLineNumber": 54,
                           "startColumn": 21,
                           "endLineNumber": 54,
                           "endColumn": 22
-                         }
-                        },
-                        {
-                         "type": "CONSTANT",
-                         "text": "1",
-                         "children": null,
-                         "range": {
-                          "startLineNumber": 54,
-                          "startColumn": 22,
-                          "endLineNumber": 54,
-                          "endColumn": 23
                          }
                         }
                        ]
@@ -7297,9 +7297,9 @@
                        "children": null,
                        "range": {
                         "startLineNumber": 54,
-                        "startColumn": 23,
+                        "startColumn": 22,
                         "endLineNumber": 54,
-                        "endColumn": 24
+                        "endColumn": 23
                        }
                       }
                      ]
@@ -7312,9 +7312,9 @@
                    "children": null,
                    "range": {
                     "startLineNumber": 54,
-                    "startColumn": 24,
+                    "startColumn": 23,
                     "endLineNumber": 54,
-                    "endColumn": 25
+                    "endColumn": 24
                    }
                   }
                  ]
@@ -7325,9 +7325,9 @@
                  "children": null,
                  "range": {
                   "startLineNumber": 54,
-                  "startColumn": 25,
+                  "startColumn": 24,
                   "endLineNumber": 54,
-                  "endColumn": 26
+                  "endColumn": 25
                  }
                 }
                ]
