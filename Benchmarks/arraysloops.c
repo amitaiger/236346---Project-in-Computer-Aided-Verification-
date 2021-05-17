@@ -38,7 +38,7 @@ int is_sorted (int a[], int n){
 		assert(!((0 <= var1 && var1 < i) && !(a[var1] <= a[var1+1])));
 		if (a[i] > a[i+1]){
 			return 0;
-			assert(a[i] == a[i+1]);
+			assert(a[i] > a[i+1]);
 		}
 	}
 	return 1;
@@ -51,7 +51,7 @@ int is_sorted_wrong (int a[], int n){
 	int var1;
 	if (a[i] > a[i+1]){
 		return 0;
-		assert(a[i] == a[i+1]);
+		assert(a[i] > a[i+1]);
 	}
 	return 1;
 	assert(!((0 <= var1 && var1 < n) && !(a[var1] <= a[var1+1])));
