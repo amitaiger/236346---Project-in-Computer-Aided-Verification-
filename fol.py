@@ -158,8 +158,21 @@ def find_assertion (cfg, node):
     next_node = cfg[next]
     if "I" in next_node:
         return next_node.get("I")
+    if cfg[node.get("id")].get("type") == "loop": #adding loop invariant for spacer to solve
+        return create_loop_invariant (cfg, node)
     return " True "
         
+def create_loop_invariant (cfg, node):
+    variables = cfg[node.get("id")].get("variables")
+    inv = " Inv"+node.get("id")+" ("
+    for var in variables:
+        name = var.get("name")
+        if name.endswith("[ ] "):
+            name = name[:-5]
+        inv += name + ","
+    inv = inv[:-1]
+    inv += ") "
+    return inv
 
 #produce FOL formula for a list containing all routes in CFG
 def produce_fol_routes (cfg, routes):

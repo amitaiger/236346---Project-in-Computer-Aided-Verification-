@@ -204,7 +204,7 @@ def get_label_inner(data, label):
 def get_id(data):
     line = data.get("range").get("startLineNumber")
     column = data.get("range").get("startColumn")
-    return str(line)+", "+str(column)    
+    return "r"+str(line)+"c"+str(column)    
 
 #get a list of all variables that will be used in the function
 def get_variables(data, variables):
@@ -236,6 +236,10 @@ def create_cfg (data, cfg, next_node, variables):
     for name, node in cfg_iter:
         if node.get("type") == "ensures":
             node["function"] = next(cfg_iter)[0]
+        else:
+            if node.get("type") == "return" and node.get("next") != "end":
+                cfg[node.get("next")]["next"] = "end"
+                    
 
 def create_cfg_inner (data, cfg, next, variables):
     valid_types = ["function_definition",
