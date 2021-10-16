@@ -3,9 +3,12 @@ def produce_condition_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    if len(route) == i+1:
-        route[i]["R"] = " True "
+    if len(route) == i+1: 
         route[i]["T"] = get_initial_t(node.get("variables"))
+        if len(route) > 1: #last node in loop route
+            route[i]["R"] = " True "
+        else: #one node route, should only happen if loop condition is false
+            route[i]["R"] = " Not (" + label +") )"
     else:
         route[i]["T"] = route[i+1].get("T")
         if route[i+1].get("id") == node.get("true"):
@@ -13,7 +16,7 @@ def produce_condition_fol(cfg, route, i):
         else: #next node is false
             route[i]["R"] = " And ("+route[i+1].get("R") + "," + " Not (" + label +") )"
 
-#produce FOL formula for a declaration or assert node
+#produce FOL formula for a declaration, assert or assume node
 def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
@@ -115,6 +118,7 @@ def produce_fol_inner(cfg, route, i):
         "assignment": produce_assignment_fol,
         "declaration": produce_static_fol,
         "assert": produce_static_fol,
+        "assume": produce_static_fol,
         "do": produce_static_fol,
         "return": produce_return_fol,
         "function": produce_function_fol
@@ -131,7 +135,8 @@ def append_ensures (cfg, routes):
                 for subnode in route:
                     if subnode.get("id") != node.get("function") and route.index(subnode) == 0: #route not of current ensures function
                         break
-                    if cfg[subnode.get("id")].get("next") == "end":
+                    if cfg[subnode.get("id")].get("next") == "end" or \
+                    (cfg[subnode.get("id")].get("false") == "end" and len(route) == 1):
                         route.append(new_node)
                         break
                         
