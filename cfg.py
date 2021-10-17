@@ -284,9 +284,12 @@ def create_cfg_inner (data, cfg, next, variables):
 #find all routes in CFG
 def find_routes (cfg, routes):
     for name, node in cfg.items():
-        if node.get("type") == "function" or node.get("type") == "loop":
+        if node.get("type") == "function":
             routes.append([])
-            find_routes_inner(cfg, routes, routes[-1], name)
+            current_function = routes[-1]
+        if node.get("type") == "function" or node.get("type") == "loop":
+            current_function.append([])
+            find_routes_inner(cfg, current_function, current_function[-1], name)
     
     
 def find_routes_inner (cfg, routes, current_route, current_node_name):

@@ -143,11 +143,12 @@ def append_ensures (cfg, routes):
 
 #adds assertions to start and end of route if it doesn't have one
 def add_assertions (cfg, routes):
-    for route in routes:
-        first_node = route[0]
-        last_node = route[len(route)-1]
-        first_node["I"] = find_assertion(cfg, first_node)
-        last_node["I"] = find_assertion(cfg, last_node)
+    for function in routes:
+        for route in function:
+            first_node = route[0]
+            last_node = route[len(route)-1]
+            first_node["I"] = find_assertion(cfg, first_node)
+            last_node["I"] = find_assertion(cfg, last_node)
 
 #find the assertion for node in next node, if it exists.
 #otherwise, assertions is just 'True'
@@ -181,7 +182,8 @@ def create_loop_invariant (cfg, node):
 
 #produce FOL formula for a list containing all routes in CFG
 def produce_fol_routes (cfg, routes):
-    for route in routes:
-        produce_fol (cfg, route)
+    for function in routes:
+        for route in function:
+            produce_fol (cfg, route)
     append_ensures (cfg, routes)
     add_assertions (cfg, routes)
