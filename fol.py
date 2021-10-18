@@ -88,7 +88,7 @@ def get_initial_t(variables):
         name = variable.get("name")
         if name.endswith("[ ] "):
             name = name[:-4]
-        initial_t = initial_t + name +"|"
+        initial_t = initial_t + name +","
     initial_t = initial_t[:-1]
     initial_t = initial_t+")"
     return initial_t
@@ -174,7 +174,7 @@ def create_loop_invariant (cfg, node):
     for var in variables:
         name = var.get("name")
         if name.endswith("[ ] "):
-            name = name[:-5]
+            name = name[:-4]
         inv += name + ","
     inv = inv[:-1]
     inv += ") "
