@@ -23,10 +23,12 @@ def declare_invariant(i, variables):
 def add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, variables):
     first_t_list = list(trim_whitespace(first_t)[1:-1].split(","))
     last_t_list = list(trim_whitespace(last_t)[1:-1].split(","))
-    rule = "ForAll(["+variables_string[1:-1]+"], Implies (And ("
+    rule = ""
     for i in range(len(first_t_list)):
         if first_t_list[i] != last_t_list[i]:
             rule += trim_whitespace(last_t_list[i])+"_last == " + first_t_list[i] + ", "
+            variables_string = variables_string[:-2]+", "+trim_whitespace(last_t_list[i])+"_last ) "
+    rule = "ForAll(["+variables_string[2:-2]+"], Implies (And (" + rule
     rule += first_i + ", "
     rule += r + ", "
     rule += "Not(" + last_i + ")), "
@@ -36,11 +38,13 @@ def add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, varia
 def add_rule(r, first_t, last_t, first_i, last_i, variables_string, variables):
     first_t_list = list(trim_whitespace(first_t)[1:-1].split(","))
     last_t_list = list(trim_whitespace(last_t)[1:-1].split(","))
-    rule = "ForAll(["+variables_string[1:-1]+"], Implies (And ("
+    rule = ""
     for i in range(len(first_t_list)):
         if first_t_list[i] != last_t_list[i]:
             rule += trim_whitespace(last_t_list[i])+"_last == " + first_t_list[i] + ", "
             last_i = last_i.replace(" "+trim_whitespace(last_t_list[i])+" ", " "+trim_whitespace(last_t_list[i])+"_last " )
+            variables_string = variables_string[:-2]+", "+trim_whitespace(last_t_list[i])+"_last ) "
+    rule = "ForAll(["+variables_string[2:-2]+"], Implies (And (" + rule
     rule += first_i + ", "
     rule += r + "), "
     rule += last_i+"))"
@@ -83,9 +87,9 @@ def add_route (route, cfg, s):
     if last_i.startswith(" Invr"): 
         exec(declare_invariant(last_i, variables))
     if cfg[last.get("id")].get("type") == "assert":
-        exec(add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, variables))
+        exec("s.add("+add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, variables)+")")
     else:
-        exec(add_rule(r, first_t, last_t, first_i, last_i, variables_string, variables))
+        exec("s.add("+add_rule(r, first_t, last_t, first_i, last_i, variables_string, variables)+")")
     
 def verify_function (function, cfg):
     s = SolverFor("HORN")
