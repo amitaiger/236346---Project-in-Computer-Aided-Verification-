@@ -21,14 +21,14 @@ def declare_invariant(i, variables):
     return invariant
                 
 def add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, variables):
-    first_t_list = list(trim_whitespace(first_t)[1:-1].split(","))
-    last_t_list = list(trim_whitespace(last_t)[1:-1].split(","))
+    first_t_list = list(trim_whitespace(first_t)[1:-1].split("|"))
+    last_t_list = list(trim_whitespace(last_t)[1:-1].split("|"))
     rule = ""
     for i in range(len(first_t_list)):
         if first_t_list[i] != last_t_list[i]:
             rule += trim_whitespace(last_t_list[i])+"_last == " + first_t_list[i] + ", "
             variables_string = variables_string[:-2]+", "+trim_whitespace(last_t_list[i])+"_last ) "
-    rule = "ForAll(["+variables_string[2:-2]+"], Implies (And (" + rule
+    rule = "ForAll(["+variables_string[2:-2].replace("|",",")+"], Implies (And (" + rule
     rule += first_i + ", "
     rule += r + ", "
     rule += "Not(" + last_i + ")), "
@@ -36,15 +36,15 @@ def add_assert_rule(r, first_t, last_t, first_i, last_i, variables_string, varia
     return rule
     
 def add_rule(r, first_t, last_t, first_i, last_i, variables_string, variables):
-    first_t_list = list(trim_whitespace(first_t)[1:-1].split(","))
-    last_t_list = list(trim_whitespace(last_t)[1:-1].split(","))
+    first_t_list = list(trim_whitespace(first_t)[1:-1].split("|"))
+    last_t_list = list(trim_whitespace(last_t)[1:-1].split("|"))
     rule = ""
     for i in range(len(first_t_list)):
         if first_t_list[i] != last_t_list[i]:
             rule += trim_whitespace(last_t_list[i])+"_last == " + first_t_list[i] + ", "
             last_i = last_i.replace(" "+trim_whitespace(last_t_list[i])+" ", " "+trim_whitespace(last_t_list[i])+"_last " )
             variables_string = variables_string[:-2]+", "+trim_whitespace(last_t_list[i])+"_last ) "
-    rule = "ForAll(["+variables_string[2:-2]+"], Implies (And (" + rule
+    rule = "ForAll(["+variables_string[2:-2].replace("|", ",")+"], Implies (And (" + rule
     rule += first_i + ", "
     rule += r + "), "
     rule += last_i+"))"
@@ -93,6 +93,7 @@ def add_route (route, cfg, s):
     
 def verify_function (function, cfg):
     s = SolverFor("HORN")
+    s.set("timeout", 600)
     function_id =  function[0][0].get("id")
     function_name = cfg[function_id].get("label")
     for route in function:
@@ -101,8 +102,8 @@ def verify_function (function, cfg):
         print ("Failed to verify function:" + function_name)
     else:
         print ("Invariants for function: " + function_name)
-        print(s.model())
-        
+        print(s.model())  
+    
 def verify_program (routes, cfg):
     print("Attempting to verify program...")
     for function in routes:
@@ -112,3 +113,4 @@ def verify_program (routes, cfg):
 def trim_whitespace (string):
     string = " ".join(string.split())
     return string
+
