@@ -19,7 +19,7 @@ def make_function_node(data, cfg, next, variables):
     get_variables(data, cfg[id].get("variables"))
     return cfg[id].get("variables")
 
-#create node for a declaration, assignment or assert in CFG    
+#create node for a declaration, assignment, assert or assume in CFG    
 def make_static_node(data, cfg, next, variables):
     id = get_id(data)
     i = None;
@@ -36,16 +36,21 @@ def make_static_node(data, cfg, next, variables):
             i = label[9:]
             i = i[:-2] #strips assert to its condition
         else:
-            if label.startswith(" ensures"):
-                node_type = "ensures"
-                i = label[label.find("("):]
-                i = i[1:]
-                i = i[:-2] #strips ensures to its condition
+            if label.startswith(" assume"):
+                node_type = "assume"
+                i = label[9:]
+                i = i[:-2] #strips assume to its condition
             else:
-                if data.get("children")[0].get("type") == "relational_expression":
-                    return variables #for loop condition node, already created
+                if label.startswith(" ensures"):
+                    node_type = "ensures"
+                    i = label[label.find("("):]
+                    i = i[1:]
+                    i = i[:-2] #strips ensures to its condition
                 else:
-                    node_type = "assignment"    
+                    if data.get("children")[0].get("type") == "relational_expression":
+                        return variables #for loop condition node, already created
+                    else:
+                        node_type = "assignment"    
     cfg[id] = {
         "type": node_type,
         "label": label,
@@ -204,7 +209,7 @@ def get_label_inner(data, label):
 def get_id(data):
     line = data.get("range").get("startLineNumber")
     column = data.get("range").get("startColumn")
-    return str(line)+", "+str(column)    
+    return "r"+str(line)+"c"+str(column)    
 
 #get a list of all variables that will be used in the function
 def get_variables(data, variables):
@@ -236,6 +241,10 @@ def create_cfg (data, cfg, next_node, variables):
     for name, node in cfg_iter:
         if node.get("type") == "ensures":
             node["function"] = next(cfg_iter)[0]
+        else:
+            if node.get("type") == "return" and node.get("next") != "end":
+                cfg[node.get("next")]["next"] = "end"
+                    
 
 def create_cfg_inner (data, cfg, next, variables):
     valid_types = ["function_definition",
@@ -275,9 +284,12 @@ def create_cfg_inner (data, cfg, next, variables):
 #find all routes in CFG
 def find_routes (cfg, routes):
     for name, node in cfg.items():
-        if node.get("type") == "function" or node.get("type") == "loop":
+        if node.get("type") == "function":
             routes.append([])
-            find_routes_inner(cfg, routes, routes[-1], name)
+            current_function = routes[-1]
+        if node.get("type") == "function" or node.get("type") == "loop":
+            current_function.append([])
+            find_routes_inner(cfg, current_function, current_function[-1], name)
     
     
 def find_routes_inner (cfg, routes, current_route, current_node_name):
@@ -290,7 +302,10 @@ def find_routes_inner (cfg, routes, current_route, current_node_name):
     current_node.get("type") == "loop":
         routes.append(copy.deepcopy(current_route))
         false_route = routes[-1]
-        find_routes_inner(cfg, routes, current_route, current_node.get("true"))
-        find_routes_inner(cfg, routes, false_route, current_node.get("false"))
+        if current_node.get("true")!='end':
+            find_routes_inner(cfg, routes, current_route, current_node.get("true"))
+        if current_node.get("false")!='end':
+            find_routes_inner(cfg, routes, false_route, current_node.get("false"))
     else:
-        find_routes_inner(cfg, routes, current_route, current_node.get("next"))
+        if current_node.get("next")!='end':
+            find_routes_inner(cfg, routes, current_route, current_node.get("next"))

@@ -3,9 +3,12 @@ def produce_condition_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
     label = node.get("label")
-    if len(route) == i+1:
-        route[i]["R"] = " True "
+    if len(route) == i+1: 
         route[i]["T"] = get_initial_t(node.get("variables"))
+        if len(route) > 1: #last node in loop route
+            route[i]["R"] = " True "
+        else: #one node route, should only happen if loop condition is false
+            route[i]["R"] = " Not (" + label +") )"
     else:
         route[i]["T"] = route[i+1].get("T")
         if route[i+1].get("id") == node.get("true"):
@@ -13,7 +16,7 @@ def produce_condition_fol(cfg, route, i):
         else: #next node is false
             route[i]["R"] = " And ("+route[i+1].get("R") + "," + " Not (" + label +") )"
 
-#produce FOL formula for a declaration or assert node
+#produce FOL formula for a declaration, assert or assume node
 def produce_static_fol(cfg, route, i):
     id = route[i].get("id")
     node = cfg.get(id)
@@ -115,6 +118,7 @@ def produce_fol_inner(cfg, route, i):
         "assignment": produce_assignment_fol,
         "declaration": produce_static_fol,
         "assert": produce_static_fol,
+        "assume": produce_static_fol,
         "do": produce_static_fol,
         "return": produce_return_fol,
         "function": produce_function_fol
@@ -131,18 +135,20 @@ def append_ensures (cfg, routes):
                 for subnode in route:
                     if subnode.get("id") != node.get("function") and route.index(subnode) == 0: #route not of current ensures function
                         break
-                    if cfg[subnode.get("id")].get("next") == "end":
+                    if cfg[subnode.get("id")].get("next") == "end" or \
+                    (cfg[subnode.get("id")].get("false") == "end" and len(route) == 1):
                         route.append(new_node)
                         break
                         
 
 #adds assertions to start and end of route if it doesn't have one
 def add_assertions (cfg, routes):
-    for route in routes:
-        first_node = route[0]
-        last_node = route[len(route)-1]
-        first_node["I"] = find_assertion(cfg, first_node)
-        last_node["I"] = find_assertion(cfg, last_node)
+    for function in routes:
+        for route in function:
+            first_node = route[0]
+            last_node = route[len(route)-1]
+            first_node["I"] = find_assertion(cfg, first_node)
+            last_node["I"] = find_assertion(cfg, last_node)
 
 #find the assertion for node in next node, if it exists.
 #otherwise, assertions is just 'True'
@@ -158,12 +164,26 @@ def find_assertion (cfg, node):
     next_node = cfg[next]
     if "I" in next_node:
         return next_node.get("I")
+    if cfg[node.get("id")].get("type") == "loop": #adding loop invariant for spacer to solve
+        return create_loop_invariant (cfg, node)
     return " True "
         
+def create_loop_invariant (cfg, node):
+    variables = cfg[node.get("id")].get("variables")
+    inv = " Inv"+node.get("id")+" ("
+    for var in variables:
+        name = var.get("name")
+        if name.endswith("[ ] "):
+            name = name[:-4]
+        inv += name + ","
+    inv = inv[:-1]
+    inv += ") "
+    return inv
 
 #produce FOL formula for a list containing all routes in CFG
 def produce_fol_routes (cfg, routes):
-    for route in routes:
-        produce_fol (cfg, route)
+    for function in routes:
+        for route in function:
+            produce_fol (cfg, route)
     append_ensures (cfg, routes)
     add_assertions (cfg, routes)
