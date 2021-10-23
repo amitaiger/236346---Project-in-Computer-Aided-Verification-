@@ -30,7 +30,7 @@ def verify():
     code_file = open("temp", "w")
     code_file.write(program_code)
     code_file.close() 
-    run_program = "node ../ext/sindarin.js parse temp && mv temp.ast.json ../benchmarks/c/json && python ../main.py"
+    run_program = "node ../ext/sindarin.js parse temp > junk && mv temp.ast.json ../benchmarks/c/json && python -u ../main.py"
     p = subprocess.run(run_program, stdout=subprocess.PIPE, shell=True)
     return p.stdout
 
@@ -45,3 +45,6 @@ def load_benchmark():
                 benchmark_code = f.read()
     return benchmark_code
 
+@app.route("/welcome")
+def welcome():
+    return "Welcome! Enter either benchmark name or your own code."
