@@ -72,10 +72,7 @@ function main() {
     var ide = new IDE;
     ide.listBenchmarks();
     ide.cm.focus();
-
-    ide.open('/');
-
-    // Useful for debugging in dev console
+    ide.open('/welcome');
     Object.assign(window, {ide});
 }
 
