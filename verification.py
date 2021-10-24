@@ -61,7 +61,7 @@ def add_route (route, cfg, s):
         name = trim_whitespace(name)
         if type == " int ":
             if name.endswith("[ ]"):
-                name = name[:-4]
+                name = name[:-4] #removes [] from array name
                 exec(name+" = Array('"+name+"', IntSort(), IntSort())")
                 exec(name+"_last = Array('"+name+"_last', IntSort(), IntSort())")
             else:
@@ -96,13 +96,19 @@ def verify_function (function, cfg):
     s.set("timeout", 600)
     function_id =  function[0][0].get("id")
     function_name = cfg[function_id].get("label")
+    variables = cfg[function_id].get("variables")
     for route in function:
         add_route(route, cfg, s)
     if s.check() != sat:
         print ("Failed to verify function:" + function_name)
     else:
+        if str(s.model()) == "[]":
+            print ("Succesfully verified" + function_name)
+            return
         print ("Invariants for function: " + function_name)
-        print(s.model())  
+        invariants = insert_variables_names_in_invariant(variables, str(s.model()))
+        print(invariants)
+        
     
 def verify_program (routes, cfg):
     print("Attempting to verify program...")
@@ -114,3 +120,11 @@ def trim_whitespace (string):
     string = " ".join(string.split())
     return string
 
+#inserts the functions variables names instead of just "Var(x)"
+def insert_variables_names_in_invariant (variables, invariants):
+    for i, variable in enumerate(variables):
+        variable_name = trim_whitespace(variable.get("name"))
+        if variable_name.endswith("[ ]"):
+            variable_name = variable_name[:-4] #removes [] from array name
+        invariants = invariants.replace("Var("+str(i)+")", variable_name)
+    return invariants
